@@ -6,7 +6,7 @@ stalker	= require "lib/STALKER-X"
 downwall = 1; rightwall = 2; leftwall = 3
 mainmenu = 0; game = 1; gameover = 2; pause = 3
 
-world = wind.newWorld(0, 40, true)
+world = wind.newWorld(0, 50, true)
 
 -- GAME STATES
 --------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ end
 function game_load()
 	mode = game
 	camera:fade(.2, {0,0,0,0})
-	map = Map:new("maps/tutorial/1.lua")
+	map = Map:new("maps/tutorial/2.lua")
 	camera:setFollowLerp(0.1)
 	camera:setFollowStyle('PLATFORMER')
 
@@ -311,7 +311,7 @@ function Monk:initialize(x, y, count)
 		
 	for i=0,(count-1) do
 		self.monks[i] = world:newRectangleCollider(x - (i * 20), y, 16, 16);
-		self.monks[i]:setCollisionClass('Monk')
+		self.monks[i]:setCollisionClass('monk')
 		self.monks[i]:setObject(self)
 		self.monkSprites[i] = 'default'
 		self.frozen[i] = false
@@ -341,6 +341,7 @@ function Monk:update(dt)
 
 	local allFrozen = true
 	for k,frozen in pairs(self.frozen) do
+		if (frozen == true) then self.monks[k]:setType('static'); end
 		if (frozen == false) then allFrozen = false; end
 	end
 	if (allFrozen == true) then gameover_load(); end
@@ -440,8 +441,6 @@ function Monk:freeze (indice)
 	indice = indice or self.current
 	local monk = self.monks[indice]
 	self.frozen[indice] = true
-	monk:setType('static')
-	monk:setCollisionClass('Platform')
 
 	if (indice == self.current) then
 		for i=0,self.last do
@@ -465,8 +464,8 @@ function Monk:makeCollisionCallback (i)
 	local function collision(collision1, collision2, contact)
 		local nx, ny = contact:getNormal( )
 
-		if collision1.collision_class == "Monk"
-		and collision2.collision_class == "Platform"
+		if (collision1.collision_class == "monk"
+		and collision2.collision_class == "platform")
 		then
 			if (math.abs(ny) == 1) then
 				self.onGround[i] = downwall
@@ -477,6 +476,17 @@ function Monk:makeCollisionCallback (i)
 				if not (self.onGround[i] == 0) then return; end
 				self.onGround[i] = rightwall
 			end
+
+		elseif (collision1.collision_class == "monk"
+		and collision2.collision_class == "button")
+		then
+			map.buttonHit = true
+
+		elseif (collision1.collision_class == "monk"
+		and collision2.collision_class == "frozenButton"
+		and self.frozen[i] == true)
+		then
+			map.frozenHit = true
 		end
 	end
 	return collision
@@ -514,6 +524,9 @@ function Map:initialize(filepath)
 	self.outOfBounds = "die"
 	self.spawn = {['x'] = 100, ['y'] = 100}
 	self.respawn = {['x'] = 100, ['y'] = 100}
+	self.buttonHit = false
+	self.frozenHit = false
+
 	local maptable = dofile(filepath)
 
 	self.width,self.height = maptable.width,maptable.height
@@ -524,9 +537,16 @@ function Map:initialize(filepath)
 	local monkX,monkY = 100,100
 	world:destroy()
 	world = wind.newWorld(0, 400, true)
-	world:addCollisionClass('Monk')
-	world:addCollisionClass('Banana')
-	world:addCollisionClass('Platform')
+	world:addCollisionClass('monk')
+	world:addCollisionClass('banana')
+	world:addCollisionClass('platform')
+	world:addCollisionClass('button')
+	world:addCollisionClass('frozenButton')
+	world:addCollisionClass('toyButton')
+	world:addCollisionClass('door')
+	world:addCollisionClass('frozenDoor')
+	world:addCollisionClass('toyDoor')
+	world:addCollisionClass('toy')
 
 	for n,layer in pairs(maptable.layers) do
 		if not (layer.type == "objectgroup") then break; end
@@ -537,7 +557,7 @@ function Map:initialize(filepath)
 					world:newRectangleCollider(object.x, object.y,
 						object.width, object.height)
 				self.tables[object.id]:setType('static')
-				self.tables[object.id]:setCollisionClass('Platform')
+				self.tables[object.id]:setCollisionClass('platform')
 
 			elseif (object.shape == "polygon") then
 				local ox,oy = object.x,object.y
@@ -551,7 +571,7 @@ function Map:initialize(filepath)
 				self.tables[object.id] =
 					world:newPolygonCollider(vertices)
 				self.tables[object.id]:setType('static')
-				self.tables[object.id]:setCollisionClass('Platform')
+				self.tables[object.id]:setCollisionClass('platform')
 
 			elseif (object.shape == "text") then
 				self.tables[object.id] = object
@@ -570,6 +590,29 @@ function Map:initialize(filepath)
 			elseif (object.shape == "point" and object.type == "banana") then
 				self.objects[object.id] = Banana:new(object.x, object.y)
 			end
+
+			local thisTable = self.tables[object.id]
+			if (object.type == "door" or object.type == "frozenDoor"
+			or object.type == "toyDoor")
+			then
+				thisTable.normPos = {}
+				thisTable.normPos['x'],thisTable.normPos['y'] =
+					thisTable.body:getPosition()
+			end
+
+			if (object.type == "door") then
+				thisTable:setCollisionClass('door')
+			elseif (object.type == "frozenDoor") then
+				thisTable:setCollisionClass('frozenDoor')
+			elseif (object.type == "toyDoor") then
+				thisTable:setCollisionClass('toyDoor')
+			elseif (object.type == "button") then
+				thisTable:setCollisionClass('button')
+			elseif (object.type == "frozenButton") then
+				thisTable:setCollisionClass('frozenButton')
+			elseif (object.type == "toyButton") then
+				thisTable:setCollisionClass('toyButton')
+			end
 		end
 	end
 	player = Monk:new(self.spawn['x'], self.spawn['y'], monkCount)
@@ -580,6 +623,7 @@ function Map:update(dt)
 	local heightMax = self.height * self.tileHeight + 100
 	local widthMax = self.width * self.tileWidth + 200
 
+	-- enforce borders
 	for i=0,player.last do
 		local x,y = player.monks[i].body:getPosition()
 
@@ -592,6 +636,31 @@ function Map:update(dt)
 				self.respawn['x'], self.respawn['y'])
 		end
 	end
+
+	-- unlock or reset doors
+	for k,table in pairs(self.tables) do
+		if (table.collision_class == "door" and self.buttonHit == true) then
+			table.body:setPosition(-1000, -1000)
+		elseif (table.collision_class == "door") then
+			table.body:setPosition(table.normPos['x'], table.normPos['y'])
+
+		elseif (table.collision_class == "frozenDoor"
+		and self.frozenHit == true)
+		then
+			table.body:setPosition(-1000, -1000)
+		elseif (table.collision_clas == "frozenDoor") then
+			table.body:setPosition(table.normPos['x'], table.normPos['y'])
+
+		elseif (table.collision_class == "toyDoor"
+		and self.toyHit == true)
+		then
+			table.body:setPosition(-1000, -1000)
+		elseif (table.collision_clas == "toyDoor") then
+			table.body:setPosition(table.normPos['x'], table.normPos['y'])
+		end
+	end
+
+	self.toyHit = false
 end
 
 

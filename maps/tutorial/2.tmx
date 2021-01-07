@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="18">
+ <editorsettings>
+  <export target="2.lua" format="lua"/>
+ </editorsettings>
+ <objectgroup id="2" name="platforms">
+  <object id="1" x="752" y="128">
+   <polygon points="0,0 -224,48 -1.33333,48"/>
+  </object>
+  <object id="2" x="748" y="14.6667" width="52" height="161.333"/>
+  <object id="3" x="1.33333" y="177.333" width="797.333" height="16"/>
+  <object id="4" x="-2.66667" y="30.6667" width="510.667" height="16"/>
+  <object id="5" x="-2.66667" y="46.6667" width="20" height="145.333"/>
+ </objectgroup>
+ <objectgroup id="4" name="special">
+  <object id="9" type="spawn" x="697.333" y="134.667">
+   <properties>
+    <property name="count" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="12" type="banana" x="54.6667" y="174.667">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="signs">
+  <object id="16" x="515.628" y="63.5" width="82.0781" height="17">
+   <text wrap="1">touch it! go on!</text>
+  </object>
+  <object id="17" x="151.628" y="63.5" width="82.0781" height="17">
+   <text wrap="1">frozen monkeys + frozen buttons</text>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="doors">
+  <object id="7" type="door" x="444" y="49.3333" width="20" height="128"/>
+  <object id="8" type="frozenDoor" x="110.667" y="48" width="17.3333" height="129.333"/>
+ </objectgroup>
+ <objectgroup id="5" name="buttons">
+  <object id="10" type="button" x="480" y="166.667" width="42.6667" height="9.33333"/>
+  <object id="11" type="frozenButton" x="176" y="166.667" width="58.6667" height="9.33333"/>
+ </objectgroup>
+</map>
