@@ -180,6 +180,7 @@ function game_draw ()
 
 	map:draw()
 	player:draw()
+	bananna:draw()
 
 	camera:detach()
 	camera:draw()
@@ -208,6 +209,11 @@ function game_keypressed(key)
 		player.following = true
 	elseif (key == "f" and player.following == true) then
 		player.following = false
+
+	elseif (key == "=" and camera.scale < 10) then
+		camera.scale = camera.scale + 1
+	elseif (key == "-" and camera.scale > 1) then
+		camera.scale = camera.scale - 1
 	end
 end
 
@@ -424,6 +430,25 @@ end
 
 
 
+-- BANNANA		owo (win condition obj)
+----------------------------------------
+Bananna = class('Bananna')
+world:addCollisionClass('Bananna')
+
+function Bananna:initialize(x, y)
+	self.sprite = love.graphics.newImage("art/sprites/bananna.png")
+	self.collider = world:newRectangleCollider(x, y, 16, 16);
+end
+
+
+function Bananna:draw()
+	local col = self.collider
+	local x,y = col.body:getWorldPoints(col.shape:getPoints())
+	love.graphics.draw(self.sprite, x, y, col.body:getAngle(), 1, 1)
+end
+
+
+
 -- MAP	used to store map data (ofc)
 ----------------------------------------
 Map = class('Map')
@@ -437,6 +462,9 @@ function Map:initialize(filepath)
 	local maptable = dofile(filepath)
 
 	love.graphics.setBackgroundColor(146/255, 187/255, 203/255)
+	local monkCount = 3
+	local monkX,monkY = 100,100
+	local banannaX,banannaY =  200,200
 
 	for n,layer in pairs(maptable.layers) do
 		if not (layer.type == "objectgroup") then break; end
@@ -452,15 +480,19 @@ function Map:initialize(filepath)
 				self.objects[o_c]:setCollisionClass('Platform')
 
 			elseif (object.shape == "point" and object.type == "spawn") then
-				local monkCount = 3
 				if not (object.properties == nil
 					and object.properties["count"] == nil) then
 					monkCount = object.properties["count"]
 				end
-				player = Monk:new(object.x, object.y, monkCount)
+				monkX,monkY = object.x,object.y
+
+			elseif (object.shape == "point" and object.type == "bananna") then
+				banannaX,banannaY = object.x,object.y
 			end
 		end
 	end
+	player = Monk:new(monkX, monkY, monkCount)
+	bananna = Bananna:new(banannaX, banannaY)
 end
 
 

@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 5,
-  nextobjectid = 34,
+  nextobjectid = 46,
   properties = {},
   tilesets = {},
   layers = {
@@ -35,37 +35,22 @@ return {
           height = 17,
           rotation = 0,
           visible = true,
-          text = "Hello, monkeys.",
+          text = "move with wasd or arrow keys",
           wrap = true,
           properties = {}
         },
         {
-          id = 30,
+          id = 38,
           name = "",
           type = "",
           shape = "text",
-          x = 132.961,
-          y = 50.8333,
+          x = 1102.96,
+          y = 312.833,
           width = 82.0781,
           height = 17,
           rotation = 0,
           visible = true,
-          text = "You're hungry, aren't you?",
-          wrap = true,
-          properties = {}
-        },
-        {
-          id = 31,
-          name = "",
-          type = "",
-          shape = "text",
-          x = 230.294,
-          y = 70.8333,
-          width = 82.0781,
-          height = 17,
-          rotation = 0,
-          visible = true,
-          text = "Go on ahead, then.",
+          text = "hit 'space' to create a platform",
           wrap = true,
           properties = {}
         }
@@ -328,6 +313,19 @@ return {
           rotation = 0,
           visible = true,
           properties = {}
+        },
+        {
+          id = 43,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 1370,
+          y = 236,
+          width = 222.667,
+          height = 77.3333,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     },
@@ -356,6 +354,19 @@ return {
           properties = {
             ["count"] = 4
           }
+        },
+        {
+          id = 45,
+          name = "",
+          type = "bananna",
+          shape = "point",
+          x = 1484,
+          y = 240,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     }

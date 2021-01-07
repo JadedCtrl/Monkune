@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="34">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="46">
  <editorsettings>
   <export target="1.lua" format="lua"/>
  </editorsettings>
  <objectgroup id="2" name="Object Layer 1">
   <object id="2" name="hi" x="37.6276" y="34.1667" width="94.08" height="17">
-   <text wrap="1">Hello, monkeys.</text>
+   <text wrap="1">move with wasd or arrow keys</text>
   </object>
-  <object id="30" x="132.961" y="50.8333" width="82.0781" height="17">
-   <text wrap="1">You're hungry, aren't you?</text>
-  </object>
-  <object id="31" x="230.294" y="70.8333" width="82.0781" height="17">
-   <text wrap="1">Go on ahead, then.</text>
+  <object id="38" x="1102.96" y="312.833" width="82.0781" height="17">
+   <text wrap="1">hit 'space' to create a platform</text>
   </object>
  </objectgroup>
  <objectgroup id="3" name="Object Layer 2">
@@ -34,12 +31,16 @@
   <object id="24" x="959.333" y="353.333" width="30.6667" height="157.333"/>
   <object id="26" x="989.333" y="367.333" width="34.6667" height="143.333"/>
   <object id="29" x="1024" y="384.667" width="224" height="126.667"/>
+  <object id="43" x="1370" y="236" width="222.667" height="77.3333"/>
  </objectgroup>
  <objectgroup id="4" name="Object Layer 3">
   <object id="32" type="spawn" x="93" y="80">
    <properties>
     <property name="count" type="int" value="4"/>
    </properties>
+   <point/>
+  </object>
+  <object id="45" type="bananna" x="1484" y="240">
    <point/>
   </object>
  </objectgroup>
