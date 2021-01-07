@@ -9,7 +9,7 @@ return {
   tilewidth = 16,
   tileheight = 16,
   nextlayerid = 4,
-  nextobjectid = 20,
+  nextobjectid = 33,
   properties = {},
   tilesets = {},
   layers = {
@@ -62,6 +62,63 @@ return {
           rotation = 0,
           visible = true,
           properties = {}
+        },
+        {
+          id = 27,
+          name = "",
+          type = "",
+          shape = "polygon",
+          x = 800,
+          y = 530.242,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          polygon = {
+            { x = 0, y = 0 },
+            { x = -360.606, y = 269.697 },
+            { x = -6.06061, y = 266.667 }
+          },
+          properties = {}
+        },
+        {
+          id = 28,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 46.6665,
+          y = 791.333,
+          width = 66.6667,
+          height = 14.6667,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 29,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 177.333,
+          y = 790,
+          width = 105.333,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 30,
+          name = "",
+          type = "",
+          shape = "rectangle",
+          x = 346.667,
+          y = 788.667,
+          width = 54.6667,
+          height = 16,
+          rotation = 0,
+          visible = true,
+          properties = {}
         }
       }
     },
@@ -77,12 +134,12 @@ return {
       properties = {},
       objects = {
         {
-          id = 9,
+          id = 31,
           name = "",
           type = "spawn",
           shape = "point",
-          x = 378.031,
-          y = 420.905,
+          x = 321.333,
+          y = 484,
           width = 0,
           height = 0,
           rotation = 0,
@@ -92,58 +149,14 @@ return {
           }
         },
         {
-          id = 16,
+          id = 32,
           name = "",
-          type = "",
-          shape = "polygon",
-          x = 800,
-          y = 524.242,
+          type = "respawn",
+          shape = "point",
+          x = 330.667,
+          y = 2.66667,
           width = 0,
           height = 0,
-          rotation = 0,
-          visible = true,
-          polygon = {
-            { x = 0, y = 0 },
-            { x = -360.606, y = 269.697 },
-            { x = -6.06061, y = 266.667 }
-          },
-          properties = {}
-        },
-        {
-          id = 17,
-          name = "",
-          type = "",
-          shape = "rectangle",
-          x = 46.6667,
-          y = 785.333,
-          width = 66.6667,
-          height = 14.6667,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 18,
-          name = "",
-          type = "",
-          shape = "rectangle",
-          x = 177.333,
-          y = 784,
-          width = 105.333,
-          height = 16,
-          rotation = 0,
-          visible = true,
-          properties = {}
-        },
-        {
-          id = 19,
-          name = "",
-          type = "",
-          shape = "rectangle",
-          x = 346.667,
-          y = 782.667,
-          width = 54.6667,
-          height = 16,
           rotation = 0,
           visible = true,
           properties = {}

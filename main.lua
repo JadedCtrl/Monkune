@@ -115,14 +115,6 @@ function mainmenu_update(dt)
 	elseif (num == 3) then
 		dirs['up'] = 1
 	end
-
-	-- teleport off-screen monkeys
-	for i=0,player.last do
-		local x,y = player.monks[i].body:getPosition()
-		if (y > 2000) then
-			player.monks[i].body:setPosition(200,0)
-		end
-	end
 end
 
 
@@ -519,7 +511,9 @@ function Map:initialize(filepath)
 	self.platforms = {}
 	self.tables = {}
 	self.objects = {}
-	self.outOfBounds = "teleport"
+	self.outOfBounds = "die"
+	self.spawn = {['x'] = 100, ['y'] = 100}
+	self.respawn = {['x'] = 100, ['y'] = 100}
 	local maptable = dofile(filepath)
 
 	self.width,self.height = maptable.width,maptable.height
@@ -567,14 +561,18 @@ function Map:initialize(filepath)
 					or object.properties["count"] == nil) then
 					monkCount = object.properties["count"]
 				end
-				monkX,monkY = object.x,object.y
+				self.spawn['x'],self.spawn['y'] = object.x,object.y
+
+			elseif (object.shape == "point" and object.type == "respawn") then
+				self.respawn['x'],self.respawn['y'] = object.x,object.y
+				self.outOfBounds = "teleport"
 
 			elseif (object.shape == "point" and object.type == "banana") then
 				self.objects[object.id] = Banana:new(object.x, object.y)
 			end
 		end
 	end
-	player = Monk:new(monkX, monkY, monkCount)
+	player = Monk:new(self.spawn['x'], self.spawn['y'], monkCount)
 end
 
 
@@ -582,15 +580,16 @@ function Map:update(dt)
 	local heightMax = self.height * self.tileHeight + 100
 	local widthMax = self.width * self.tileWidth + 200
 
-	for i=player.current,player.last do
+	for i=0,player.last do
 		local x,y = player.monks[i].body:getPosition()
 
-		if (math.abs(x) > widthMax or y > heightMax
+		if ((math.abs(x) > widthMax or y > heightMax)
 			and self.outOfBounds == "die") then
-			player:freeze()
-		elseif (math.abs(x) > widthMax or y > heightMax
+			player:freeze(i)
+		elseif ((math.abs(x) > widthMax or y > heightMax)
 				and self.outOfBounds == "teleport") then
-			player.monks[i].body:setPosition(200,0)
+			player.monks[i].body:setPosition(
+				self.respawn['x'], self.respawn['y'])
 		end
 	end
 end
