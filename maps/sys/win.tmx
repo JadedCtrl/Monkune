@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="49">
+ <editorsettings>
+  <export target="win.lua" format="lua"/>
+ </editorsettings>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="2" x="38.932" y="306.814" width="14.6488" height="242.519"/>
+  <object id="4" x="55.2085" y="537.94" width="524.102" height="11.3935"/>
+  <object id="6" x="581.752" y="306" width="14.6488" height="242.52"/>
+  <object id="37" x="466.819" y="306.636" width="120.137" height="11.4416"/>
+  <object id="40" x="54.9199" y="311.213">
+   <polygon points="0,0 529.748,225.4 -3.43249,229.977"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="Object Layer 2">
+  <object id="31" type="spawn" x="521.562" y="299.789">
+   <properties>
+    <property name="count" type="int" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="32" type="respawn" x="535.472" y="17.5408">
+   <point/>
+  </object>
+  <object id="33" type="banana" x="99.5423" y="315.789">
+   <point/>
+  </object>
+  <object id="41" type="banana" x="133.867" y="320.366">
+   <point/>
+  </object>
+  <object id="42" type="banana" x="124.714" y="291.762">
+   <point/>
+  </object>
+  <object id="43" type="banana" x="183.066" y="307.78">
+   <point/>
+  </object>
+  <object id="44" type="banana" x="177.346" y="259.725">
+   <point/>
+  </object>
+  <object id="45" type="banana" x="219.68" y="296.339">
+   <point/>
+  </object>
+  <object id="46" type="banana" x="181.922" y="356.979">
+   <point/>
+  </object>
+  <object id="47" type="banana" x="217.391" y="328.375">
+   <point/>
+  </object>
+  <object id="48" type="banana" x="245.995" y="358.124">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

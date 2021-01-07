@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="33">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="49">
  <editorsettings>
-  <export target="menu.lua" format="lua"/>
+  <export format="lua"/>
  </editorsettings>
  <objectgroup id="2" name="Object Layer 1">
   <object id="2" x="38.932" y="306.814" width="14.6488" height="242.519"/>
@@ -22,6 +22,9 @@
    <point/>
   </object>
   <object id="32" type="respawn" x="330.667" y="2.66667">
+   <point/>
+  </object>
+  <object id="33" type="banana" x="78.9474" y="784.897">
    <point/>
   </object>
  </objectgroup>

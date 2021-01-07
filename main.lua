@@ -80,12 +80,12 @@ end
 function mainmenu_load ()
 	mode = mainmenu
 	selection = 1
---	if(bgm) then
---		bgm:stop()
---	end
---	bgm = love.audio.newSource("art/music/menu.ogg", "static")
---	bgm:play()
---	bgm:setLooping(true)
+	if(bgm) then
+		bgm:stop()
+	end
+	bgm = love.audio.newSource("art/music/default.mp3", "static")
+	bgm:play()
+	bgm:setLooping(true)
 --	bgm:setVolume(1.5)
 	frontMenu = nil
 	mapMenu = nil
@@ -196,6 +196,9 @@ end
 -- PAUSE STATE
 ----------------------------------------
 function pause_load()
+	if(bgm) then
+		bgm:stop()
+	end
 	mode = pause
 end
 
@@ -215,6 +218,9 @@ end
 
 function pause_keypressed(key)
 	if (key == "return") then
+		if(bgm) then
+			bgm:play()
+		end
 		mode = game
 	elseif (key == "escape") then
 		mainmenu_load()
@@ -265,6 +271,13 @@ end
 function youwin_load ()
 	mode = youwin
 
+	if(bgm) then
+		bgm:stop()
+	end
+	bgm = love.audio.newSource("art/music/win.mp3", "static")
+	bgm:play()
+	bgm:setLooping(true)
+
 	camera = stalker()
 	map = Map:new("maps/sys/win.lua")
 end
@@ -282,7 +295,7 @@ function youwin_draw ()
 
 	camera:detach()
 	love.graphics.draw(love.graphics.newText(r_ttf,
-		"monkey happy!\n"), 200, 200, 0, 3, 3)
+		"monkey happy!\nhit enter!"), 200, 200, 0, 3, 3)
 	camera:attach()
 end
 
@@ -357,9 +370,9 @@ function game_keypressed(key)
 		player.following = false
 
 	elseif (key == "=" and camera.scale < 10) then
-		camera.scale = camera.scale + 1
-	elseif (key == "-" and camera.scale > 1) then
-		camera.scale = camera.scale - 1
+		camera.scale = camera.scale + .5
+	elseif (key == "-" and camera.scale > .5) then
+		camera.scale = camera.scale - .5
 
 	elseif (key == "escape") then
 		pause_load()
