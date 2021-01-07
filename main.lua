@@ -4,7 +4,7 @@ wind	= require "lib/windfield"
 stalker	= require "lib/STALKER-X"
 
 downwall = 1; rightwall = 2; leftwall = 3
-mainmenu = 0; game = 1; gameover = 2; pause = 3
+mainmenu = 0; game = 1; gameover = 2; pause = 3; youwin = 4
 
 world = wind.newWorld(0, 40, true)
 
@@ -30,6 +30,7 @@ function love.update(dt)
 	if(mode == mainmenu) then		mainmenu_update(dt)
 	elseif(mode == game) then		game_update(dt)
 	elseif(mode == gameover) then	gameover_update(dt)
+	elseif(mode == youwin) then		youwin_update(dt)
 	elseif(mode == pause) then		pause_update(dt)
 	end
 	camera:update(dt)
@@ -41,6 +42,7 @@ function love.draw()
 	if(mode == mainmenu)		then mainmenu_draw()
 	elseif(mode == game)		then game_draw()
 	elseif(mode == gameover)	then gameover_draw()
+	elseif(mode == youwin)		then youwin_draw()
 	elseif(mode == pause)		then pause_draw()
 	end
 	camera:detach()
@@ -57,6 +59,7 @@ function love.keypressed(key)
 	if(mode == mainmenu) then		mainmenu_keypressed(key)
 	elseif(mode == game) then		game_keypressed(key)
 	elseif(mode == gameover) then	gameover_keypressed(key)
+	elseif(mode == youwin) then		youwin_keypressed(key)
 	elseif(mode == pause) then		pause_keypressed(key)
 	end
 end
@@ -66,6 +69,7 @@ function love.keyreleased (key)
 	if(mode == mainmenu) then		mainmenu_keyreleased(key)
 	elseif(mode == game) then		game_keyreleased(key)
 	elseif(mode == gameover) then	gameover_keyreleased(key)
+	elseif(mode == youwin) then		youwin_keyreleased(key)
 	elseif(mode == pause) then		pause_keyreleased(key)
 	end
 end
@@ -89,7 +93,7 @@ function mainmenu_load ()
 	frontMenu_init()
 
 	camera = stalker()
-	map = Map:new("maps/menu.lua")
+	map = Map:new("maps/sys/menu.lua")
 	player.following = true
 end
 
@@ -243,7 +247,7 @@ end
 
 
 function gameover_keypressed(key)
-	if (key == "return") then
+	if (key == "return" or key == "space") then
 		camera:fade(.2, {0,0,0,1}, function() game_load() end)
 	elseif (key == "escape") then
 		mainmenu_load()
@@ -252,6 +256,45 @@ end
 
 
 function gameover_keyreleased(key)
+end
+
+
+
+-- YOUWIN STATE
+----------------------------------------
+function youwin_load ()
+	mode = youwin
+
+	camera = stalker()
+	map = Map:new("maps/sys/win.lua")
+end
+
+
+function youwin_update(dt)
+	world:update(dt)
+	player:update(dt)
+end
+
+
+function youwin_draw ()
+	map:draw()
+	player:draw()
+
+	camera:detach()
+	love.graphics.draw(love.graphics.newText(r_ttf,
+		"monkey happy!\n"), 200, 200, 0, 3, 3)
+	camera:attach()
+end
+
+
+function youwin_keypressed(key)
+	if (key == "return" or key == "space" or key == "escape") then
+		mainmenu_load()
+	end
+end
+
+
+function youwin_keyreleased(key)
 end
 
 
@@ -538,6 +581,11 @@ function Monk:makeCollisionCallback (i)
 			end
 
 		elseif (collision1.collision_class == "monk"
+		and collision2.collision_class == "banana")
+		then
+			youwin_load()
+
+		elseif (collision1.collision_class == "monk"
 		and collision2.collision_class == "button")
 		then
 			map.buttonHit = true
@@ -561,6 +609,7 @@ Banana = class('Banana')
 function Banana:initialize(x, y)
 	self.sprite = love.graphics.newImage("art/sprites/banana.png")
 	self.collider = world:newRectangleCollider(x, y, 16, 16);
+	self.collider:setCollisionClass('banana')
 end
 
 
