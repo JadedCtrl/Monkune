@@ -18,6 +18,7 @@ endif
 	rm -rf bin/monkune-win32
 
 test: love
+	mkdir -p bin
 	love bin/monkune.love
 
 clean: 
