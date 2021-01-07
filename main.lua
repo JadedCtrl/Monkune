@@ -6,7 +6,7 @@ stalker	= require "lib/STALKER-X"
 downwall = 1; rightwall = 2; leftwall = 3
 mainmenu = 0; game = 1; gameover = 2; pause = 3
 
-world = wind.newWorld(0, 50, true)
+world = wind.newWorld(0, 40, true)
 
 -- GAME STATES
 --------------------------------------------------------------------------------
@@ -83,22 +83,20 @@ function mainmenu_load ()
 --	bgm:play()
 --	bgm:setLooping(true)
 --	bgm:setVolume(1.5)
---
+	frontMenu = nil
+	mapMenu = nil
+
+	frontMenu_init()
+
 	camera = stalker()
 	map = Map:new("maps/menu.lua")
 	player.following = true
-
-	frontMenu = Menu:new(100, 100, 30, 50, 3, {
-		{love.graphics.newText(a_ttf, "get banana"),
-			function ()
-				camera:fade(.2, {0,0,0,1}, function() game_load() end)
-			end},
-		{love.graphics.newText(a_ttf, "get outta dodge"),
-			function () love.event.quit(0) end }})
 end
 
 
 function mainmenu_update(dt)
+	if not (mapMenu == nil) then return; end
+
 	world:update(dt)
 	player:update(dt)
 	map:update(dt)
@@ -119,26 +117,81 @@ end
 
 
 function mainmenu_draw ()
-	map:draw()
-	player:draw()
-	frontMenu:draw()
+	if (mapMenu == nil) then
+		map:draw()
+		player:draw()
+		frontMenu:draw()
+	else
+		mapMenu:draw()
+	end
 end
 
 
 function mainmenu_keypressed(key)
-	frontMenu:keypressed(key)
+	if (mapMenu == nil) then
+		frontMenu:keypressed(key)
+	else
+		mapMenu:keypressed(key)
+	end
 end
 
 
 function mainmenu_keyreleased(key)
-	frontMenu:keyreleased(key)
+	if (mapMenu == nil) then
+		frontMenu:keyreleased(key)
+	else
+		mapMenu:keyreleased(key)
+	end
 end
 
+
+function frontMenu_init()
+	frontMenu = Menu:new(100, 100, 30, 50, 3, {
+		{love.graphics.newText(a_ttf, "get banana"),
+			function () mapMenu_init() end},
+--				camera:fade(.2, {0,0,0,1}, function() mapMenu_init() end)
+--				2, {0,0,0,1}, function() mapMenu_init() end)
+--			end},
+		{love.graphics.newText(a_ttf, "get outta dodge"),
+			function () love.event.quit(0) end }})
+	mapMenu = nil
+end
+
+
+function mapMenu_init(directory)
+	directory = directory or "maps"
+	local menuEntries = {[1] = {love.graphics.newText(a_ttf, "../"),
+		function () mainmenu_load() end}}
+--			if (directory == "maps") then mainmenu_load()
+
+	local indice = 2
+	local files = love.filesystem.getDirectoryItems(directory)
+
+	for k,file in pairs(files) do
+		file = directory .. "/" .. file
+		local filetype = love.filesystem.getInfo(file).type
+		local fileSplit = split(file, ".")
+		local fileExt = fileSplit[2] or ""
+		
+		if (filetype == "directory") then
+			menuEntries[indice] = {love.graphics.newText(a_ttf, file .. "/"),
+					function() mapMenu_init(file) end}
+			indice = indice + 1
+		elseif (filetype == "file" and fileExt == "lua") then
+			menuEntries[indice] = {love.graphics.newText(a_ttf, fileSplit[1]),
+					function() game_load(file) end}
+			indice = indice + 1
+		end
+	end
+
+	mapMenu = Menu:new(100, 100, 30, 50, 3, menuEntries)
+	frontMenu = nil
+end
 
 
 -- PAUSE STATE
 ----------------------------------------
-function pause_load ()
+function pause_load()
 	mode = pause
 end
 
@@ -205,10 +258,13 @@ end
 
 -- GAME STATE
 ----------------------------------------
-function game_load()
+function game_load(mapfile)
 	mode = game
+
+	mapfile = mapfile or map.filepath
+	map = Map:new(mapfile)
+
 	camera:fade(.2, {0,0,0,0})
-	map = Map:new("maps/tutorial/2.lua")
 	camera:setFollowLerp(0.1)
 	camera:setFollowStyle('PLATFORMER')
 
@@ -341,8 +397,12 @@ function Monk:update(dt)
 
 	local allFrozen = true
 	for k,frozen in pairs(self.frozen) do
-		if (frozen == true) then self.monks[k]:setType('static'); end
-		if (frozen == false) then allFrozen = false; end
+		if (frozen == true) then
+			self.monks[k]:setType('static')
+			self.monks[k]:setCollisionClass('platform')
+		elseif (frozen == false) then
+			allFrozen = false
+		end
 	end
 	if (allFrozen == true) then gameover_load(); end
 
@@ -517,6 +577,7 @@ end
 Map = class('Map')
 
 function Map:initialize(filepath)
+	self.filepath = filepath
 	self.ground = {}
 	self.platforms = {}
 	self.tables = {}
@@ -591,7 +652,15 @@ function Map:initialize(filepath)
 				self.objects[object.id] = Banana:new(object.x, object.y)
 			end
 
+
 			local thisTable = self.tables[object.id]
+
+			if (object.type == "toy") then
+				thisTable:setCollisionClass('toy')
+				thisTable:setType('kinematic')
+			end
+
+
 			if (object.type == "door" or object.type == "frozenDoor"
 			or object.type == "toyDoor")
 			then
@@ -615,6 +684,7 @@ function Map:initialize(filepath)
 			end
 		end
 	end
+
 	player = Monk:new(self.spawn['x'], self.spawn['y'], monkCount)
 end
 
@@ -655,7 +725,7 @@ function Map:update(dt)
 		and self.toyHit == true)
 		then
 			table.body:setPosition(-1000, -1000)
-		elseif (table.collision_clas == "toyDoor") then
+		elseif (table.collision_class == "toyDoor") then
 			table.body:setPosition(table.normPos['x'], table.normPos['y'])
 		end
 	end
@@ -755,3 +825,11 @@ function Menu:keyreleased(key)
 end
 
 
+
+function split(inputString, seperator)
+        local newString = {}
+        for stringBit in string.gmatch(inputString, "([^"..seperator.."]+)") do
+                table.insert(newString, stringBit)
+        end
+        return newString
+end
