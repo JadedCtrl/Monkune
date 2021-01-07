@@ -21,8 +21,6 @@ function love.load ()
 	r_ttf = love.graphics.newFont("art/font/romulus.ttf", nil, "none")
 
 	camera = stalker()
-	camera:setFollowStyle('PLATFORMER')
-	camera:setFollowLerp(0.1)
 
 	mainmenu_load()
 end
@@ -86,8 +84,7 @@ function mainmenu_load ()
 --	bgm:setLooping(true)
 --	bgm:setVolume(1.5)
 --
-	camera:setBounds(0,0, 10, 10)
-	camera:fade(.2, {0,0,0,0},  function() camera = stalker() end)
+	camera = stalker()
 	map = Map:new("maps/menu.lua")
 	player.following = true
 
@@ -126,7 +123,6 @@ function mainmenu_update(dt)
 			player.monks[i].body:setPosition(200,0)
 		end
 	end
-	print(camera.x, ",", camera.y)
 end
 
 
@@ -151,6 +147,7 @@ end
 -- PAUSE STATE
 ----------------------------------------
 function pause_load ()
+	mode = pause
 end
 
 
@@ -159,10 +156,20 @@ end
 
 
 function pause_draw ()
+	game_draw()
+	camera:detach()
+	love.graphics.draw(love.graphics.newText(r_ttf,
+		"paused\n[enter to continue]\n[escape to exit]"), 200, 200, 0, 3, 3)
+	camera:attach()
 end
 
 
 function pause_keypressed(key)
+	if (key == "return") then
+		mode = game
+	elseif (key == "escape") then
+		mainmenu_load()
+	end
 end
 
 
@@ -194,7 +201,7 @@ function gameover_keypressed(key)
 	if (key == "return") then
 		camera:fade(.2, {0,0,0,1}, function() game_load() end)
 	elseif (key == "escape") then
-		camera:fade(.2, {0,0,0,1}, function() mainmenu_load() end)
+		mainmenu_load()
 	end
 end
 
@@ -210,8 +217,8 @@ function game_load()
 	mode = game
 	camera:fade(.2, {0,0,0,0})
 	map = Map:new("maps/tutorial/1.lua")
-	camera:setBounds(-200, -1000, map.width * map.tileWidth + 200,
-		map.height * map.tileHeight + 2000)
+	camera:setFollowLerp(0.1)
+	camera:setFollowStyle('PLATFORMER')
 
 --	bgm:stop()
 --	bgm = love.audio.newSource("art/music/game.ogg", "static")
@@ -262,6 +269,9 @@ function game_keypressed(key)
 		camera.scale = camera.scale + 1
 	elseif (key == "-" and camera.scale > 1) then
 		camera.scale = camera.scale - 1
+
+	elseif (key == "escape") then
+		pause_load()
 	end
 end
 
@@ -294,6 +304,7 @@ Monk = class('Monk')
 
 function Monk:initialize(x, y, count)
 	self.monks = {}
+	self.frozen = {}
 	self.onGround = {}
 	self.current = 0
 	self.last = count - 1
@@ -311,6 +322,7 @@ function Monk:initialize(x, y, count)
 		self.monks[i]:setCollisionClass('Monk')
 		self.monks[i]:setObject(self)
 		self.monkSprites[i] = 'default'
+		self.frozen[i] = false
 
 		local collision = self:makeCollisionCallback(i)
 		self.monks[i]:setPreSolve(collision)
@@ -330,10 +342,16 @@ function Monk:update(dt)
 
 	for i=0,(self.last) do
 		if (self.onGround[i] > 0) then self.monkSprites[i] = 'default'
+		elseif (self.frozen[i] == true) then self.monkSprites[i] = 'frozen'
 		else self.monkSprites[i] = 'jump'
 		end
 	end
 
+	local allFrozen = true
+	for k,frozen in pairs(self.frozen) do
+		if (frozen == false) then allFrozen = false; end
+	end
+	if (allFrozen == true) then gameover_load(); end
 
 	-- cleanup
 	for i=0,(self.last) do
@@ -345,21 +363,12 @@ end
 
 
 function Monk:draw ()
-	-- live monkeys
-	for i=self.current,self.last do
+	for i=0,self.last do
 		local monk = self.monks[i]
 		local x,y = monk.body:getWorldPoints(monk.shape:getPoints())
 
 		love.graphics.draw(self.sprites[self.monkSprites[i]], x, y,
 			monk.body:getAngle(), 1, 1)
-	end
-	-- frozen monkeys
-	for i=0,self.current-1 do
-		local monk = self.monks[i]
-		local x,y = monk.body:getWorldPoints(monk.shape:getPoints())
-
-		love.graphics.draw(self.sprites['frozen'], x, y, monk.body:getAngle(),
-			1, 1)
 	end
 end
 
@@ -435,14 +444,20 @@ end
 
 
 -- freeze the player monkey in place, making it a platform
-function Monk:freeze ()
-	if not (self.current > self.last) then
-		local monk = self.monks[self.current]
-		monk:setType('static')
-		monk:setCollisionClass('Platform')
-		self:switch(self.current + 1)
-	else
-		gameover_load()
+function Monk:freeze (indice)
+	indice = indice or self.current
+	local monk = self.monks[indice]
+	self.frozen[indice] = true
+	monk:setType('static')
+	monk:setCollisionClass('Platform')
+
+	if (indice == self.current) then
+		for i=0,self.last do
+			if (self.frozen[self.last - i] == false) then
+				self:switch(self.last - i)
+				i = self.last
+			end
+		end
 	end
 end
 
@@ -450,9 +465,6 @@ end
 -- switch from current monkey to next
 function Monk:switch (index)
 	self.current = index
-	if (index > self.last) then
-		gameover_load()
-	end
 end
 
 
