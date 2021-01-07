@@ -17,7 +17,8 @@ function love.load ()
 
 	dieParticle = nil
 	love.graphics.setDefaultFilter("nearest", "nearest")
---	a_ttf = love.graphics.newFont("art/font/alagard.ttf", nil, "none")
+	a_ttf = love.graphics.newFont("art/font/alagard.ttf", nil, "none")
+	r_ttf = love.graphics.newFont("art/font/romulus.ttf", nil, "none")
 
 --	mainmenu_load()
 	game_load()
@@ -74,7 +75,7 @@ function mainmenu_load ()
 --	bgm:setVolume(1.5)
 --
 --	frontMenu = Menu:new(100, 100, 30, 50, 2, 
---			      { { love.graphics.newText(a_ttf, "get bannana!"),
+--			      { { love.graphics.newText(a_ttf, "get banana!"),
 --				  function () game_load() end },
 --				{ love.graphics.newText(a_ttf, "get help!"),
 --				  function () helpScreen = true end },
@@ -180,7 +181,7 @@ function game_draw ()
 
 	map:draw()
 	player:draw()
-	bananna:draw()
+	banana:draw()
 
 	camera:detach()
 	camera:draw()
@@ -436,7 +437,7 @@ Bananna = class('Bananna')
 world:addCollisionClass('Bananna')
 
 function Bananna:initialize(x, y)
-	self.sprite = love.graphics.newImage("art/sprites/bananna.png")
+	self.sprite = love.graphics.newImage("art/sprites/banana.png")
 	self.collider = world:newRectangleCollider(x, y, 16, 16);
 end
 
@@ -464,7 +465,7 @@ function Map:initialize(filepath)
 	love.graphics.setBackgroundColor(146/255, 187/255, 203/255)
 	local monkCount = 3
 	local monkX,monkY = 100,100
-	local banannaX,banannaY =  200,200
+	local bananaX,bananaY =  200,200
 
 	for n,layer in pairs(maptable.layers) do
 		if not (layer.type == "objectgroup") then break; end
@@ -479,6 +480,10 @@ function Map:initialize(filepath)
 				self.objects[o_c]:setType('static')
 				self.objects[o_c]:setCollisionClass('Platform')
 
+			elseif (object.shape == "text") then
+				self.object_c = self.object_c + 1
+				self.objects[self.object_c] = object
+
 			elseif (object.shape == "point" and object.type == "spawn") then
 				if not (object.properties == nil
 					and object.properties["count"] == nil) then
@@ -486,13 +491,13 @@ function Map:initialize(filepath)
 				end
 				monkX,monkY = object.x,object.y
 
-			elseif (object.shape == "point" and object.type == "bananna") then
-				banannaX,banannaY = object.x,object.y
+			elseif (object.shape == "point" and object.type == "banana") then
+				bananaX,bananaY = object.x,object.y
 			end
 		end
 	end
 	player = Monk:new(monkX, monkY, monkCount)
-	bananna = Bananna:new(banannaX, banannaY)
+	banana = Bananna:new(bananaX, bananaY)
 end
 
 
@@ -502,9 +507,29 @@ end
 
 function Map:draw()
 	for k,object in pairs(self.objects) do
-		love.graphics.polygon('fill',
-			object.body:getWorldPoints(object.shape:getPoints()))
+		if (object.type == "Rectangle") then
+			love.graphics.polygon('fill',
+				object.body:getWorldPoints(object.shape:getPoints()))
+		elseif (object.shape == "text") then
+			love.graphics.draw(love.graphics.newText(a_ttf, object.text),
+				object.x, object.y)
+		end
 	end	
+end
+
+
+
+-- TEXTBOX	gods forgive me
+----------------------------------------
+Textbox = class("Textbox")
+
+function Textbox:initialize(x, y, string)
+	self.x,self.y = x,y
+	self.text = love.graphics.newText(a_ttf, string)
+end
+
+function Textbox:draw()
+	love.graphics.draw(self.text, self.x, self.y)
 end
 
 
@@ -528,6 +553,9 @@ function Menu:draw ()
 --			love.graphics.draw(love.graphics.newText(a_ttf, ">>"),
 --					    self.x - self.offset_x, this_y, 0,
 --					    self.scale, self.scale)
+			love.graphics.draw(love.graphics.newText(a_ttf, ">>"),
+					    self.x - self.offset_x, this_y, 0,
+					    self.scale, self.scale)
 end
 
 function Menu:keypressed(key)
