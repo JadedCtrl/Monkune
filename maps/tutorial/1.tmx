@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="34">
+ <editorsettings>
+  <export target="1.lua" format="lua"/>
+ </editorsettings>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="2" name="hi" x="37.6276" y="34.1667" width="94.08" height="17">
+   <text wrap="1">Hello, monkeys.</text>
+  </object>
+  <object id="30" x="132.961" y="50.8333" width="82.0781" height="17">
+   <text wrap="1">You're hungry, aren't you?</text>
+  </object>
+  <object id="31" x="230.294" y="70.8333" width="82.0781" height="17">
+   <text wrap="1">Go on ahead, then.</text>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="Object Layer 2">
+  <object id="4" x="18" y="94" width="460.667" height="415.333"/>
+  <object id="6" x="481.333" y="113.333" width="29.3333" height="397.333"/>
+  <object id="7" x="512.667" y="128.667" width="30" height="383.333"/>
+  <object id="10" x="545.333" y="145.333" width="29.3333" height="366.667"/>
+  <object id="11" x="576" y="159.333" width="31.3333" height="352.667"/>
+  <object id="13" x="607.333" y="176.667" width="32.6667" height="336"/>
+  <object id="14" x="640.667" y="192" width="31.3333" height="320.667"/>
+  <object id="15" x="672.667" y="208" width="30.6667" height="304"/>
+  <object id="16" x="703.333" y="224" width="33.3333" height="288"/>
+  <object id="17" x="737.333" y="240" width="30.6667" height="272.667"/>
+  <object id="18" x="768.667" y="255.333" width="30.6667" height="256.667"/>
+  <object id="19" x="799.333" y="272" width="33.3333" height="240"/>
+  <object id="20" x="832.667" y="288" width="30.6667" height="224"/>
+  <object id="21" x="864" y="303.333" width="32" height="208.667"/>
+  <object id="22" x="895.333" y="320" width="32" height="191.333"/>
+  <object id="23" x="927.333" y="336" width="30.6667" height="176"/>
+  <object id="24" x="959.333" y="353.333" width="30.6667" height="157.333"/>
+  <object id="26" x="989.333" y="367.333" width="34.6667" height="143.333"/>
+  <object id="29" x="1024" y="384.667" width="224" height="126.667"/>
+ </objectgroup>
+ <objectgroup id="4" name="Object Layer 3">
+  <object id="32" type="spawn" x="93" y="80">
+   <properties>
+    <property name="count" type="int" value="4"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+</map>
