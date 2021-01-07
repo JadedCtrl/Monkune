@@ -358,7 +358,7 @@ return {
         {
           id = 45,
           name = "",
-          type = "bananna",
+          type = "banana",
           shape = "point",
           x = 1484,
           y = 240,

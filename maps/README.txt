@@ -9,7 +9,7 @@ Text-box formatting will be ignored, but the text is used.
 You can set the spawn point of the monkey party with a point object of type
 "spawn". Otherwise, it defaults to (100,100).
 
-You can place the bannanas in the map with a point object of type "bannana".
+You can place the bananas in the map with a point object of type "banana".
 Otherwise... it'll just pop up in (200,200).
 
 Export your map to Lua, put it in a custom "maps" folder, and you're good to go!
