@@ -6,7 +6,7 @@ stalker	= require "lib/STALKER-X"
 downwall = 1; rightwall = 2; leftwall = 3
 mainmenu = 0; game = 1; gameover = 2; pause = 3
 
-world = wind.newWorld(0, 400, true)
+world = wind.newWorld(0, 40, true)
 
 -- GAME STATES
 --------------------------------------------------------------------------------
@@ -20,8 +20,11 @@ function love.load ()
 	a_ttf = love.graphics.newFont("art/font/alagard.ttf", nil, "none")
 	r_ttf = love.graphics.newFont("art/font/romulus.ttf", nil, "none")
 
---	mainmenu_load()
-	game_load()
+	camera = stalker()
+	camera:setFollowStyle('PLATFORMER')
+	camera:setFollowLerp(0.1)
+
+	mainmenu_load()
 end
 
 
@@ -31,15 +34,24 @@ function love.update(dt)
 	elseif(mode == gameover) then	gameover_update(dt)
 	elseif(mode == pause) then		pause_update(dt)
 	end
+	camera:update(dt)
 end
 
 
-function love.draw ()
+function love.draw()
+	camera:attach()
 	if(mode == mainmenu)		then mainmenu_draw()
 	elseif(mode == game)		then game_draw()
 	elseif(mode == gameover)	then gameover_draw()
 	elseif(mode == pause)		then pause_draw()
 	end
+	camera:detach()
+	camera:draw()
+end
+
+
+function love.resize()
+	camera = stalker()
 end
 
 
@@ -74,29 +86,64 @@ function mainmenu_load ()
 --	bgm:setLooping(true)
 --	bgm:setVolume(1.5)
 --
---	frontMenu = Menu:new(100, 100, 30, 50, 2, 
---			      { { love.graphics.newText(a_ttf, "get banana!"),
---				  function () game_load() end },
---				{ love.graphics.newText(a_ttf, "get help!"),
---				  function () helpScreen = true end },
---				{ love.graphics.newText(a_ttf, "get outta dodge!"),
---				  function () love.event.quit(0) end } })
+	camera:setBounds(0,0, 10, 10)
+	camera:fade(.2, {0,0,0,0},  function() camera = stalker() end)
+	map = Map:new("maps/menu.lua")
+	player.following = true
+
+	frontMenu = Menu:new(100, 100, 30, 50, 3, {
+		{love.graphics.newText(a_ttf, "get banana"),
+			function ()
+				camera:fade(.2, {0,0,0,1}, function() game_load() end)
+			end},
+		{love.graphics.newText(a_ttf, "get outta dodge"),
+			function () love.event.quit(0) end }})
 end
 
 
 function mainmenu_update(dt)
+	world:update(dt)
+	player:update(dt)
+	map:update(dt)
+
+	-- make player monkey move randomly
+	local num = math.random(100)
+	local dirs = player.directionals
+	if (num == 1) then
+		dirs['left'] = 1
+		dirs['right'] = 0
+	elseif (num == 2) then
+		dirs['right'] = 1
+		dirs['left'] = 0
+	elseif (num == 3) then
+		dirs['up'] = 1
+	end
+
+	-- teleport off-screen monkeys
+	for i=0,player.last do
+		local x,y = player.monks[i].body:getPosition()
+		if (y > 2000) then
+			player.monks[i].body:setPosition(200,0)
+		end
+	end
+	print(camera.x, ",", camera.y)
 end
 
 
 function mainmenu_draw ()
+	map:draw()
+	player:draw()
+	frontMenu:draw()
 end
 
 
 function mainmenu_keypressed(key)
+	frontMenu:keypressed(key)
 end
 
 
 function mainmenu_keyreleased(key)
+	frontMenu:keyreleased(key)
 end
 
 
@@ -126,6 +173,7 @@ end
 -- GAMEOVER STATE
 ----------------------------------------
 function gameover_load ()
+	mode = gameover
 end
 
 
@@ -135,12 +183,18 @@ end
 
 function gameover_draw ()
 	game_draw()
+	camera:detach()
+	love.graphics.draw(love.graphics.newText(r_ttf,
+		"nice try!\n[enter to restart]\n[escape to exit]"), 200, 200, 0, 3, 3)
+	camera:attach()
 end
 
 
 function gameover_keypressed(key)
-	if(key == "return"  or  key == "escape") then
-		mainmenu_load()
+	if (key == "return") then
+		camera:fade(.2, {0,0,0,1}, function() game_load() end)
+	elseif (key == "escape") then
+		camera:fade(.2, {0,0,0,1}, function() mainmenu_load() end)
 	end
 end
 
@@ -152,12 +206,12 @@ end
 
 -- GAME STATE
 ----------------------------------------
-function game_load ()
+function game_load()
 	mode = game
+	camera:fade(.2, {0,0,0,0})
 	map = Map:new("maps/tutorial/1.lua")
-	camera = stalker()
-	camera:setFollowStyle('PLATFORMER')
-	camera:setFollowLerp(0.1)
+	camera:setBounds(-200, -1000, map.width * map.tileWidth + 200,
+		map.height * map.tileHeight + 2000)
 
 --	bgm:stop()
 --	bgm = love.audio.newSource("art/music/game.ogg", "static")
@@ -171,20 +225,13 @@ function game_update(dt)
 	map:update(dt)
 
 	local x, y = player.monks[player.current].body:getPosition()
-	camera:update(dt)
 	camera:follow(x, y)
 end
 
 
 function game_draw ()
-	camera:attach()
-
 	map:draw()
 	player:draw()
-	banana:draw()
-
-	camera:detach()
-	camera:draw()
 end
 
 
@@ -244,7 +291,6 @@ end
 -- MONK		player class
 ----------------------------------------
 Monk = class('Monk')
-world:addCollisionClass('Monk')
 
 function Monk:initialize(x, y, count)
 	self.monks = {}
@@ -287,6 +333,7 @@ function Monk:update(dt)
 		else self.monkSprites[i] = 'jump'
 		end
 	end
+
 
 	-- cleanup
 	for i=0,(self.last) do
@@ -360,9 +407,9 @@ function Monk:follow ()
 		local mx, my = thisMonk.body:getPosition()
 		local dx, dy = thisMonk:getLinearVelocity()
 
-		if (mx < (x + 30)) then
+		if (mx < (x + 30) and math.random(20) == 1) then
 			thisMonk:setLinearVelocity(newVel, dy)
-		elseif ((x - 30) < mx) then
+		elseif ((x - 30) < mx and math.random(10) == 1) then
 			thisMonk:setLinearVelocity(-newVel, dy)
 		end
 
@@ -394,6 +441,8 @@ function Monk:freeze ()
 		monk:setType('static')
 		monk:setCollisionClass('Platform')
 		self:switch(self.current + 1)
+	else
+		gameover_load()
 	end
 end
 
@@ -433,16 +482,15 @@ end
 
 -- BANNANA		owo (win condition obj)
 ----------------------------------------
-Bananna = class('Bananna')
-world:addCollisionClass('Bananna')
+Banana = class('Banana')
 
-function Bananna:initialize(x, y)
+function Banana:initialize(x, y)
 	self.sprite = love.graphics.newImage("art/sprites/banana.png")
 	self.collider = world:newRectangleCollider(x, y, 16, 16);
 end
 
 
-function Bananna:draw()
+function Banana:draw()
 	local col = self.collider
 	local x,y = col.body:getWorldPoints(col.shape:getPoints())
 	love.graphics.draw(self.sprite, x, y, col.body:getAngle(), 1, 1)
@@ -453,83 +501,103 @@ end
 -- MAP	used to store map data (ofc)
 ----------------------------------------
 Map = class('Map')
-world:addCollisionClass('Platform')
 
 function Map:initialize(filepath)
 	self.ground = {}
 	self.platforms = {}
+	self.tables = {}
 	self.objects = {}
-	self.object_c = 0
+	self.outOfBounds = "teleport"
 	local maptable = dofile(filepath)
+
+	self.width,self.height = maptable.width,maptable.height
+	self.tileWidth,self.tileHeight = maptable.tilewidth,maptable.tileheight
 
 	love.graphics.setBackgroundColor(146/255, 187/255, 203/255)
 	local monkCount = 3
 	local monkX,monkY = 100,100
-	local bananaX,bananaY =  200,200
+	world:destroy()
+	world = wind.newWorld(0, 400, true)
+	world:addCollisionClass('Monk')
+	world:addCollisionClass('Banana')
+	world:addCollisionClass('Platform')
 
 	for n,layer in pairs(maptable.layers) do
 		if not (layer.type == "objectgroup") then break; end
 		for nn,object in pairs(layer.objects) do
 
 			if (object.shape == "rectangle") then
-				self.object_c = self.object_c + 1
-				local o_c = self.object_c
-				self.objects[o_c] =
+				self.tables[object.id] =
 					world:newRectangleCollider(object.x, object.y,
 						object.width, object.height)
-				self.objects[o_c]:setType('static')
-				self.objects[o_c]:setCollisionClass('Platform')
+				self.tables[object.id]:setType('static')
+				self.tables[object.id]:setCollisionClass('Platform')
+
+			elseif (object.shape == "polygon") then
+				local ox,oy = object.x,object.y
+				local vertices = {}
+				local vi = 1
+				for kk,verticePair in pairs(object.polygon) do
+					vertices[vi] = verticePair['x'] + ox
+					vertices[vi+1] = verticePair['y'] + oy
+					vi = vi + 2
+				end
+				self.tables[object.id] =
+					world:newPolygonCollider(vertices)
+				self.tables[object.id]:setType('static')
+				self.tables[object.id]:setCollisionClass('Platform')
 
 			elseif (object.shape == "text") then
-				self.object_c = self.object_c + 1
-				self.objects[self.object_c] = object
+				self.tables[object.id] = object
 
 			elseif (object.shape == "point" and object.type == "spawn") then
 				if not (object.properties == nil
-					and object.properties["count"] == nil) then
+					or object.properties["count"] == nil) then
 					monkCount = object.properties["count"]
 				end
 				monkX,monkY = object.x,object.y
 
 			elseif (object.shape == "point" and object.type == "banana") then
-				bananaX,bananaY = object.x,object.y
+				self.objects[object.id] = Banana:new(object.x, object.y)
 			end
 		end
 	end
 	player = Monk:new(monkX, monkY, monkCount)
-	banana = Bananna:new(bananaX, bananaY)
 end
 
 
 function Map:update(dt)
+	local heightMax = self.height * self.tileHeight + 100
+	local widthMax = self.width * self.tileWidth + 200
+
+	for i=player.current,player.last do
+		local x,y = player.monks[i].body:getPosition()
+
+		if (math.abs(x) > widthMax or y > heightMax
+			and self.outOfBounds == "die") then
+			player:freeze()
+		elseif (math.abs(x) > widthMax or y > heightMax
+				and self.outOfBounds == "teleport") then
+			player.monks[i].body:setPosition(200,0)
+		end
+	end
 end
 
 
 function Map:draw()
-	for k,object in pairs(self.objects) do
-		if (object.type == "Rectangle") then
+	for k,table in pairs(self.tables) do
+		if (table.type == "Rectangle" or table.type == "Polygon") then
 			love.graphics.polygon('fill',
-				object.body:getWorldPoints(object.shape:getPoints()))
-		elseif (object.shape == "text") then
-			love.graphics.draw(love.graphics.newText(a_ttf, object.text),
-				object.x, object.y)
+				table.body:getWorldPoints(table.shape:getPoints()))
+
+		elseif (table.shape == "text") then
+			love.graphics.draw(love.graphics.newText(a_ttf, table.text),
+				table.x, table.y, 0, 2, 2)
 		end
 	end	
-end
-
-
-
--- TEXTBOX	gods forgive me
-----------------------------------------
-Textbox = class("Textbox")
-
-function Textbox:initialize(x, y, string)
-	self.x,self.y = x,y
-	self.text = love.graphics.newText(a_ttf, string)
-end
-
-function Textbox:draw()
-	love.graphics.draw(self.text, self.x, self.y)
+	for k,object in pairs(self.objects) do
+		object:draw()
+	end
 end
 
 
@@ -539,56 +607,70 @@ end
 Menu = class("Menu")
 
 function Menu:initialize(x, y, offset_x, offset_y, scale, menuItems)
-	self.x = x; self.y = y
-	self.offset_x = offset_x; self.offset_y = offset_y
-	self.scale = scale
+	self.x,self.y = x,y
+	self.offset_x,self.offset_y = offset_x,offset_y
 	self.options = menuItems
 	self.selected = 1
-	self.enter = false
-	self.up = false
-	self.down = false
+	self.scale = scale
+
+	self.keys = {}
+	self.keys['up'] = false
+	self.keys['down'] = false
+	self.keys['enter'] = false
+
+	self.ttf = r_ttf
 end
 
+
 function Menu:draw ()
---			love.graphics.draw(love.graphics.newText(a_ttf, ">>"),
---					    self.x - self.offset_x, this_y, 0,
---					    self.scale, self.scale)
-			love.graphics.draw(love.graphics.newText(a_ttf, ">>"),
-					    self.x - self.offset_x, this_y, 0,
-					    self.scale, self.scale)
+	for i=1,table.maxn(self.options) do
+		local this_y = self.y + (self.offset_y * i)
+
+		love.graphics.draw(self.options[i][1],
+				    self.x, this_y, 0, self.scale, self.scale)
+		if (i == self.selected) then
+			love.graphics.draw(love.graphics.newText(self.ttf, ">>"),
+				self.x - self.offset_x, this_y, 0, self.scale, self.scale)
+		end
+	end
 end
+
 
 function Menu:keypressed(key)
 	maxn = table.maxn(self.options)
 
-	if(key == "return"  and  self.enter == false) then
-		self.enter = true
+	if (key == "return" or key == "space") then
+		self.keys['enter'] = true
 		if(self.options[self.selected][2]) then
 			self.options[self.selected][2]()
 		end
-	elseif(key == "up"  and  self.selected > 1  and  self.up == false) then
-		self.up = true
+
+	elseif (key == "up"  and  self.selected > 1
+			and  self.keys['up'] == false) then
+		self.keys['up'] = true
 		self.selected = self.selected - 1
-	elseif(key == "up"  and  self.up == false) then
-		self.up = true
+	elseif (key == "up"  and  self.keys['up'] == false) then
+		self.keys['up'] = true
 		self.selected = maxn
-	elseif(key == "down" and self.selected < maxn  and  self.down == false) then
-		self.down = true
+
+	elseif (key == "down" and self.selected < maxn
+			and  self.keys['down'] == false) then
+		self.keys['down'] = true
 		self.selected = self.selected + 1
-	elseif(key == "down" and  self.down == false) then
-		self.down = true
+	elseif (key == "down" and  self.keys['down'] == false) then
+		self.keys['down'] = true
 		self.selected = 1
 	end
 end
 
 
 function Menu:keyreleased(key)
-	if(key == "return") then
-		self.enter = false
-	elseif(key == "up") then
-		self.up = false
-	elseif(key == "down") then
-		self.down = false
+	if (key == "return" or key == "space") then
+		self.keys['enter'] = false
+	elseif (key == "up") then
+		self.keys['up'] = false
+	elseif (key == "down") then
+		self.keys['down'] = false
 	end
 end
 

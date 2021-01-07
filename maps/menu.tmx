@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="20">
+ <editorsettings>
+  <export target="menu.lua" format="lua"/>
+ </editorsettings>
+ <objectgroup id="2" name="Object Layer 1">
+  <object id="2" x="38.932" y="306.814" width="14.6488" height="242.519"/>
+  <object id="4" x="55.2085" y="537.94" width="524.102" height="11.3935"/>
+  <object id="6" x="581.752" y="306" width="14.6488" height="242.52"/>
+ </objectgroup>
+ <objectgroup id="3" name="Object Layer 2">
+  <object id="9" type="spawn" x="378.031" y="420.905">
+   <properties>
+    <property name="count" type="int" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="16" x="800" y="524.242">
+   <polygon points="0,0 -360.606,269.697 -6.06061,266.667"/>
+  </object>
+  <object id="17" x="46.6667" y="785.333" width="66.6667" height="14.6667"/>
+  <object id="18" x="177.333" y="784" width="105.333" height="16"/>
+  <object id="19" x="346.667" y="782.667" width="54.6667" height="16"/>
+ </objectgroup>
+</map>
