@@ -1,18 +1,15 @@
 MONKUNE
 ================================================================================
-is a puzzle-ish game made for Librejam 2020-01.
+Monkune is a platform-ish game, where you stack monkeys in order to get bananas.
+Made for Librejam 2020-01, with the theme of "cooperation."
 
 
-INSTALL
+RUNNING
 --------------------------------------------------
 LINUX/UNIX/HAIKU
 --------------------
-Download and open the "monkune.love" archive with the `love2d` command.
-
-WINDOWS
---------------------
-Download and extract the "monkune-win32.zip" file.
-From there, run "Monkune.exe".
+Make sure love2d is installed with your package manager, and then:
+	$ make test
 
 
 "BUILD"
@@ -26,4 +23,4 @@ BORING STUFF
 --------------------------------------------------
 Jaidyn Ann <jadedctrl@teknik.io>
 Code under GPLv3 (see COPYING.txt)
-Art assets all under CC-BY
+Art assets all under the CC-BY 3.0
